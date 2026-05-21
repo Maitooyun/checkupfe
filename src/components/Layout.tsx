@@ -44,6 +44,14 @@ export default function Layout() {
           {/* Nav */}
           <nav className="flex-1 py-4">
             <NavLink
+              to="/dashboard"
+              className={navBase}
+              style={({ isActive }) => isActive ? navActive : navInactive}
+            >
+              <span className="material-symbols-outlined">dashboard</span>
+              Dashboard
+            </NavLink>
+            <NavLink
               to="/"
               end
               className={navBase}
@@ -90,6 +98,16 @@ export default function Layout() {
         className="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 border-t md:hidden z-50"
         style={{ backgroundColor: 'var(--color-surface-container-highest)', borderColor: 'var(--color-outline-variant)' }}
       >
+        <NavLink
+          to="/dashboard"
+          className="flex flex-col items-center gap-1 transition-transform active:scale-90"
+          style={({ isActive }) => ({
+            color: isActive ? 'var(--color-primary)' : 'var(--color-on-surface-variant)',
+          })}
+        >
+          <span className="material-symbols-outlined">dashboard</span>
+          <span className="text-[10px] font-semibold">Dashboard</span>
+        </NavLink>
         <NavLink
           to="/"
           end

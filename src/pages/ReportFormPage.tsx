@@ -1,33 +1,37 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 type FormState = {
-  firstName: string
-  lastName: string
+  fullName: string
   accountNumber: string
   incidentContext: string
 }
 
 export default function ReportFormPage() {
-  const [submitted, setSubmitted] = useState(false)
+  const navigate = useNavigate()
   const [form, setForm] = useState<FormState>({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     accountNumber: '',
     incidentContext: '',
   })
 
+  const canSubmit = form.fullName.trim() !== '' && form.accountNumber.trim() !== ''
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setSubmitted(true)
-  }
-
-  function reset() {
-    setSubmitted(false)
-    setForm({ firstName: '', lastName: '', accountNumber: '', incidentContext: '' })
+    navigate('/report/success', {
+      state: {
+        fullName: form.fullName,
+        accountNumber: form.accountNumber,
+      },
+    })
   }
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 relative">
+      {/* Background decorative gradient */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none -z-10" />
+
       <div className="max-w-[800px] mx-auto w-full px-4 md:px-8 py-8 flex-1">
         {/* Heading */}
         <div className="mb-8">
@@ -37,102 +41,63 @@ export default function ReportFormPage() {
           </p>
         </div>
 
-        {submitted ? (
-          <div
-            className="rounded-xl p-10 text-center shadow-sm"
-            style={{ background: 'rgba(255,255,255,0.85)', border: '1px solid var(--color-outline-variant)', backdropFilter: 'blur(8px)' }}
-          >
-            <span className="material-symbols-outlined text-5xl mb-4 block" style={{ color: 'var(--color-tertiary)' }}>
-              check_circle
-            </span>
-            <h2 className="text-xl font-semibold mb-2">Report Submitted Successfully</h2>
-            <p className="text-sm" style={{ color: 'var(--color-on-surface-variant)' }}>
-              Thank you. Your report has been received and will be reviewed.
-            </p>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Account Holder Details — Full Name + Account Number */}
+          <Card>
+            <SectionHeader icon="person" label="Account Holder Details" />
+            <div className="space-y-4">
+              <Field label="Full Name" required>
+                <TextInput
+                  placeholder="Enter full name"
+                  value={form.fullName}
+                  onChange={(v) => setForm({ ...form, fullName: v })}
+                />
+              </Field>
+              <Field label="Account Number" required>
+                <TextInput
+                  placeholder="Enter account number"
+                  value={form.accountNumber}
+                  onChange={(v) => setForm({ ...form, accountNumber: v.replace(/\D/g, '') })}
+                  inputMode="numeric"
+                  mono
+                />
+              </Field>
+            </div>
+          </Card>
+
+          {/* Incident Context */}
+          <Card>
+            <SectionHeader icon="description" label="Incident Context" />
+            <textarea
+              rows={4}
+              placeholder="Briefly describe why this account is suspicious (optional)..."
+              value={form.incidentContext}
+              onChange={(e) => setForm({ ...form, incidentContext: e.target.value })}
+              className="w-full rounded-lg px-3 py-3 text-sm outline-none resize-none"
+              style={{
+                backgroundColor: 'var(--color-surface-container-lowest)',
+                border: '1px solid var(--color-outline-variant)',
+                color: 'var(--color-on-surface)',
+              }}
+              onFocus={(e) => (e.target.style.boxShadow = '0 0 0 1px var(--color-primary)')}
+              onBlur={(e) => (e.target.style.boxShadow = 'none')}
+            />
+          </Card>
+
+          {/* Submit */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4">
+            <div />
             <button
-              onClick={reset}
-              className="mt-6 px-8 py-3 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90"
+              type="submit"
+              disabled={!canSubmit}
+              className="w-full md:w-auto flex items-center justify-center gap-2 px-10 py-4 rounded-lg text-sm font-semibold shadow-lg transition-all active:scale-95 duration-150 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:scale-100 hover:enabled:opacity-90"
               style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
             >
-              Submit Another Report
+              Report Account
+              <span className="material-symbols-outlined text-base">send</span>
             </button>
           </div>
-        ) : (
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Account Holder Details */}
-              <Card>
-                <SectionHeader icon="person" label="Account Holder Details" />
-                <div className="space-y-4">
-                  <Field label="First Name" required>
-                    <TextInput
-                      placeholder="Enter first name"
-                      value={form.firstName}
-                      onChange={(v) => setForm({ ...form, firstName: v })}
-                    />
-                  </Field>
-                  <Field label="Last Name" required>
-                    <TextInput
-                      placeholder="Enter last name"
-                      value={form.lastName}
-                      onChange={(v) => setForm({ ...form, lastName: v })}
-                    />
-                  </Field>
-                </div>
-              </Card>
-
-              {/* Financial Information */}
-              <Card leftAccent>
-                <SectionHeader icon="account_balance" label="Financial Information" />
-                <div className="flex flex-col justify-center flex-1 space-y-4">
-                  <Field label="Bank Account Number" required>
-                    <TextInput
-                      placeholder="0000 0000 0000"
-                      value={form.accountNumber}
-                      onChange={(v) => setForm({ ...form, accountNumber: v.replace(/\D/g, '') })}
-                      inputMode="numeric"
-                      mono
-                    />
-                    <p className="mt-2 text-xs italic" style={{ color: 'var(--color-on-surface-variant)' }}>
-                      Example: 1234567890 (Enter digits only)
-                    </p>
-                  </Field>
-                </div>
-              </Card>
-            </div>
-
-            {/* Incident Context */}
-            <Card>
-              <SectionHeader icon="description" label="Incident Context" />
-              <textarea
-                rows={4}
-                placeholder="Briefly describe why this account is suspicious (optional)..."
-                value={form.incidentContext}
-                onChange={(e) => setForm({ ...form, incidentContext: e.target.value })}
-                className="w-full rounded-lg px-3 py-3 text-sm outline-none resize-none"
-                style={{
-                  backgroundColor: 'var(--color-surface-container-lowest)',
-                  border: '1px solid var(--color-outline-variant)',
-                  color: 'var(--color-on-surface)',
-                }}
-                onFocus={(e) => (e.target.style.boxShadow = '0 0 0 2px var(--color-primary)')}
-                onBlur={(e) => (e.target.style.boxShadow = 'none')}
-              />
-            </Card>
-
-            {/* Submit */}
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-10 py-4 rounded-lg text-sm font-semibold shadow-lg transition-all active:scale-95 hover:opacity-90"
-                style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)' }}
-              >
-                Report Account
-                <span className="material-symbols-outlined text-base">send</span>
-              </button>
-            </div>
-          </form>
-        )}
+        </form>
       </div>
 
       {/* Footer */}
@@ -160,15 +125,14 @@ export default function ReportFormPage() {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function Card({ children, leftAccent = false }: { children: React.ReactNode; leftAccent?: boolean }) {
+function Card({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="p-8 rounded-xl flex flex-col gap-4 shadow-sm"
       style={{
-        background: 'rgba(255,255,255,0.85)',
+        background: 'rgba(255,255,255,0.8)',
         backdropFilter: 'blur(8px)',
         border: '1px solid var(--color-outline-variant)',
-        ...(leftAccent ? { borderLeftWidth: '4px', borderLeftColor: 'var(--color-primary)' } : {}),
       }}
     >
       {children}
@@ -218,7 +182,7 @@ function TextInput({
         border: '1px solid var(--color-outline-variant)',
         color: 'var(--color-on-surface)',
       }}
-      onFocus={(e) => (e.target.style.boxShadow = '0 0 0 2px var(--color-primary)')}
+      onFocus={(e) => (e.target.style.boxShadow = '0 0 0 1px var(--color-primary)')}
       onBlur={(e) => (e.target.style.boxShadow = 'none')}
     />
   )

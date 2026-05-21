@@ -1,6 +1,14 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Chatbot',
+  '/report': 'Report Form',
+}
 
 export default function Layout() {
+  const location = useLocation()
+  const pageTitle = PAGE_TITLES[location.pathname] ?? 'Mule Bank'
+
   const navBase = 'flex items-center gap-4 px-4 py-4 text-sm font-semibold transition-all duration-200'
   const navActive = { backgroundColor: 'var(--color-primary)', color: 'var(--color-on-primary)', borderLeft: '4px solid var(--color-primary-container)' }
   const navInactive = { color: 'rgba(255,255,255,0.8)' }
@@ -9,9 +17,11 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-on-surface)' }}>
       {/* Top App Bar */}
       <header
-        className="sticky top-0 z-50 h-16 border-b md:hidden"
+        className="sticky top-0 z-50 h-16 border-b md:hidden flex items-center px-4"
         style={{ backgroundColor: 'var(--color-surface-container-low)', borderColor: 'var(--color-outline-variant)' }}
-      />
+      >
+        <span className="text-base font-bold" style={{ color: 'var(--color-on-surface)' }}>{pageTitle}</span>
+      </header>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — desktop */}
